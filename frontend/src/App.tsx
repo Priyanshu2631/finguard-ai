@@ -1,8 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
+
 import TransactionForm from "./components/TransactionForm";
 import AnalyticsDashboard from "./components/AnalyticsDashboard";
 import TransactionFilters from "./components/TransactionFilters";
-import type { TransactionFilters as FilterState } from "./components/TransactionFilters";
+import FraudAnalytics from "./components/FraudAnalytics";
+import AiFinancialInsights from "./components/AiFinancialInsights";
+import FraudDetectionLab from "./components/FraudDetectionLab";
+import AiAssistant from "./components/AiAssistant";
+
+import type {
+    TransactionFilters as FilterState,
+} from "./components/TransactionFilters";
 
 import {
     getTransactions,
@@ -10,13 +18,17 @@ import {
     deleteTransaction,
 } from "./services/transactionService";
 
-import type { Transaction } from "./services/transactionService";
+import type {
+    Transaction,
+} from "./services/transactionService";
 
 import "./App.css";
 
+
 function App() {
 
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
+    const [transactions, setTransactions] =
+        useState<Transaction[]>([]);
 
     const [editingId, setEditingId] =
         useState<number | null>(null);
@@ -45,11 +57,13 @@ function App() {
     const [editDate, setEditDate] =
         useState("");
 
+
     const loadTransactions = async () => {
 
         try {
 
-            const data = await getTransactions();
+            const data =
+                await getTransactions();
 
             setTransactions(data);
 
@@ -60,15 +74,20 @@ function App() {
         }
     };
 
+
     useEffect(() => {
         loadTransactions();
     }, []);
 
-    const handleDelete = async (id: number) => {
 
-        const confirmed = window.confirm(
-            "Are you sure you want to delete this transaction?"
-        );
+    const handleDelete = async (
+        id: number
+    ) => {
+
+        const confirmed =
+            window.confirm(
+                "Are you sure you want to delete this transaction?"
+            );
 
         if (!confirmed) {
             return;
@@ -84,9 +103,12 @@ function App() {
 
             console.error(error);
 
-            alert("Failed to delete transaction");
+            alert(
+                "Failed to delete transaction"
+            );
         }
     };
+
 
     const startEditing = (
         transaction: Transaction
@@ -117,9 +139,11 @@ function App() {
         );
     };
 
+
     const cancelEditing = () => {
         setEditingId(null);
     };
+
 
     const handleUpdate = async (
         id: number
@@ -127,25 +151,27 @@ function App() {
 
         try {
 
-            await updateTransaction(id, {
-
+            await updateTransaction(
                 id,
+                {
+                    id,
 
-                description:
-                    editDescription,
+                    description:
+                        editDescription,
 
-                amount:
-                    Number(editAmount),
+                    amount:
+                        Number(editAmount),
 
-                category:
-                    editCategory,
+                    category:
+                        editCategory,
 
-                type:
-                    editType,
+                    type:
+                        editType,
 
-                date:
-                    editDate,
-            });
+                    date:
+                        editDate,
+                }
+            );
 
             setEditingId(null);
 
@@ -155,15 +181,19 @@ function App() {
 
             console.error(error);
 
-            alert("Failed to update transaction");
+            alert(
+                "Failed to update transaction"
+            );
         }
     };
+
 
     const filteredTransactions =
         useMemo(() => {
 
             let result =
                 [...transactions];
+
 
             if (filters.search.trim()) {
 
@@ -181,6 +211,7 @@ function App() {
                     );
             }
 
+
             if (filters.category) {
 
                 result =
@@ -190,6 +221,7 @@ function App() {
                             filters.category
                     );
             }
+
 
             if (filters.type) {
 
@@ -201,6 +233,7 @@ function App() {
                     );
             }
 
+
             if (filters.date) {
 
                 result =
@@ -210,6 +243,7 @@ function App() {
                             filters.date
                     );
             }
+
 
             result.sort((a, b) => {
 
@@ -239,9 +273,11 @@ function App() {
                 }
             });
 
+
             return result;
 
         }, [transactions, filters]);
+
 
     const resetFilters = () => {
 
@@ -253,6 +289,7 @@ function App() {
             sortBy: "newest",
         });
     };
+
 
     const totalIncome =
         transactions
@@ -266,6 +303,7 @@ function App() {
                 0
             );
 
+
     const totalExpense =
         transactions
             .filter(
@@ -278,8 +316,10 @@ function App() {
                 0
             );
 
+
     const balance =
         totalIncome - totalExpense;
+
 
     return (
 
@@ -287,7 +327,9 @@ function App() {
 
             <header>
 
-                <h1>FinGuard AI</h1>
+                <h1>
+                    FinGuard AI
+                </h1>
 
                 <p>
                     Smart Personal Finance &
@@ -295,6 +337,7 @@ function App() {
                 </p>
 
             </header>
+
 
             <div className="summary">
 
@@ -311,6 +354,7 @@ function App() {
 
                 </div>
 
+
                 <div className="card">
 
                     <h3>
@@ -323,6 +367,7 @@ function App() {
                     </p>
 
                 </div>
+
 
                 <div className="card">
 
@@ -339,9 +384,34 @@ function App() {
 
             </div>
 
+
             <AnalyticsDashboard
                 transactions={transactions}
             />
+
+
+            <FraudDetectionLab
+                transactions={transactions}
+                onAnalysisSaved={
+                    loadTransactions
+                }
+            />
+
+
+            <FraudAnalytics
+                transactions={transactions}
+            />
+
+
+            <AiFinancialInsights
+                transactions={transactions}
+            />
+
+
+            <AiAssistant
+                transactions={transactions}
+            />
+
 
             <div className="content">
 
@@ -349,7 +419,12 @@ function App() {
                     onTransactionAdded={
                         loadTransactions
                     }
+
+                    previousTransactions={
+                        transactions.length
+                    }
                 />
+
 
                 <div className="transactions">
 
@@ -357,14 +432,20 @@ function App() {
                         transactions={
                             transactions
                         }
-                        filters={filters}
+
+                        filters={
+                            filters
+                        }
+
                         onFilterChange={
                             setFilters
                         }
+
                         onReset={
                             resetFilters
                         }
                     />
+
 
                     <div className="transaction-heading">
 
@@ -385,240 +466,308 @@ function App() {
 
                     </div>
 
-                    {filteredTransactions.length === 0 ? (
 
-                        <p className="empty-message">
-                            No transactions match
-                            your filters.
-                        </p>
+                    {
+                        filteredTransactions.length ===
+                        0 ? (
 
-                    ) : (
+                            <p className="empty-message">
+                                No transactions match
+                                your filters.
+                            </p>
 
-                        filteredTransactions.map(
-                            (transaction) => (
+                        ) : (
 
-                                <div
-                                    className="transaction"
-                                    key={
-                                        transaction.id
-                                    }
-                                >
+                            filteredTransactions.map(
+                                (transaction) => (
 
-                                    {editingId ===
-                                    transaction.id ? (
+                                    <div
+                                        className="transaction"
+                                        key={
+                                            transaction.id
+                                        }
+                                    >
 
-                                        <div
-                                            className="edit-form"
-                                        >
-
-                                            <input
-                                                type="text"
-                                                value={
-                                                    editDescription
-                                                }
-                                                onChange={
-                                                    (e) =>
-                                                        setEditDescription(
-                                                            e.target.value
-                                                        )
-                                                }
-                                            />
-
-                                            <input
-                                                type="number"
-                                                value={
-                                                    editAmount
-                                                }
-                                                onChange={
-                                                    (e) =>
-                                                        setEditAmount(
-                                                            e.target.value
-                                                        )
-                                                }
-                                            />
-
-                                            <select
-                                                value={
-                                                    editCategory
-                                                }
-                                                onChange={
-                                                    (e) =>
-                                                        setEditCategory(
-                                                            e.target.value
-                                                        )
-                                                }
-                                            >
-
-                                                <option>
-                                                    Food
-                                                </option>
-
-                                                <option>
-                                                    Travel
-                                                </option>
-
-                                                <option>
-                                                    Shopping
-                                                </option>
-
-                                                <option>
-                                                    Bills
-                                                </option>
-
-                                                <option>
-                                                    Entertainment
-                                                </option>
-
-                                                <option>
-                                                    Salary
-                                                </option>
-
-                                                <option>
-                                                    Other
-                                                </option>
-
-                                            </select>
-
-                                            <select
-                                                value={
-                                                    editType
-                                                }
-                                                onChange={
-                                                    (e) =>
-                                                        setEditType(
-                                                            e.target.value
-                                                        )
-                                                }
-                                            >
-
-                                                <option value="EXPENSE">
-                                                    Expense
-                                                </option>
-
-                                                <option value="INCOME">
-                                                    Income
-                                                </option>
-
-                                            </select>
-
-                                            <input
-                                                type="date"
-                                                value={
-                                                    editDate
-                                                }
-                                                onChange={
-                                                    (e) =>
-                                                        setEditDate(
-                                                            e.target.value
-                                                        )
-                                                }
-                                            />
-
-                                            <div
-                                                className="edit-buttons"
-                                            >
-
-                                                <button
-                                                    onClick={() =>
-                                                        handleUpdate(
-                                                            transaction.id!
-                                                        )
-                                                    }
-                                                >
-                                                    Save
-                                                </button>
-
-                                                <button
-                                                    onClick={
-                                                        cancelEditing
-                                                    }
-                                                >
-                                                    Cancel
-                                                </button>
-
-                                            </div>
-
-                                        </div>
-
-                                    ) : (
-
-                                        <>
-
-                                            <div>
-
-                                                <strong>
-                                                    {
-                                                        transaction.description
-                                                    }
-                                                </strong>
-
-                                                <span>
-                                                    {
-                                                        transaction.category
-                                                    }
-                                                    {" • "}
-                                                    {
-                                                        transaction.date
-                                                    }
-                                                </span>
-
-                                            </div>
-
-                                            <div
-                                                className="transaction-right"
-                                            >
-
-                                                <strong>
-                                                    {
-                                                        transaction.type ===
-                                                        "INCOME"
-                                                            ? "+"
-                                                            : "-"
-                                                    }
-                                                    ₹
-                                                    {
-                                                        transaction.amount
-                                                    }
-                                                </strong>
+                                        {
+                                            editingId ===
+                                            transaction.id ? (
 
                                                 <div
-                                                    className="transaction-actions"
+                                                    className="edit-form"
                                                 >
 
-                                                    <button
-                                                        onClick={() =>
-                                                            startEditing(
-                                                                transaction
-                                                            )
+                                                    <input
+                                                        type="text"
+                                                        value={
+                                                            editDescription
                                                         }
-                                                    >
-                                                        Edit
-                                                    </button>
+                                                        onChange={
+                                                            (e) =>
+                                                                setEditDescription(
+                                                                    e.target.value
+                                                                )
+                                                        }
+                                                    />
 
-                                                    <button
-                                                        onClick={() =>
-                                                            handleDelete(
-                                                                transaction.id!
-                                                            )
+
+                                                    <input
+                                                        type="number"
+                                                        value={
+                                                            editAmount
+                                                        }
+                                                        onChange={
+                                                            (e) =>
+                                                                setEditAmount(
+                                                                    e.target.value
+                                                                )
+                                                        }
+                                                    />
+
+
+                                                    <select
+                                                        value={
+                                                            editCategory
+                                                        }
+                                                        onChange={
+                                                            (e) =>
+                                                                setEditCategory(
+                                                                    e.target.value
+                                                                )
                                                         }
                                                     >
-                                                        Delete
-                                                    </button>
+
+                                                        <option>
+                                                            Food
+                                                        </option>
+
+                                                        <option>
+                                                            Travel
+                                                        </option>
+
+                                                        <option>
+                                                            Shopping
+                                                        </option>
+
+                                                        <option>
+                                                            Bills
+                                                        </option>
+
+                                                        <option>
+                                                            Entertainment
+                                                        </option>
+
+                                                        <option>
+                                                            Salary
+                                                        </option>
+
+                                                        <option>
+                                                            Other
+                                                        </option>
+
+                                                    </select>
+
+
+                                                    <select
+                                                        value={
+                                                            editType
+                                                        }
+                                                        onChange={
+                                                            (e) =>
+                                                                setEditType(
+                                                                    e.target.value
+                                                                )
+                                                        }
+                                                    >
+
+                                                        <option value="EXPENSE">
+                                                            Expense
+                                                        </option>
+
+                                                        <option value="INCOME">
+                                                            Income
+                                                        </option>
+
+                                                    </select>
+
+
+                                                    <input
+                                                        type="date"
+                                                        value={
+                                                            editDate
+                                                        }
+                                                        onChange={
+                                                            (e) =>
+                                                                setEditDate(
+                                                                    e.target.value
+                                                                )
+                                                        }
+                                                    />
+
+
+                                                    <div
+                                                        className="edit-buttons"
+                                                    >
+
+                                                        <button
+                                                            onClick={() =>
+                                                                handleUpdate(
+                                                                    transaction.id!
+                                                                )
+                                                            }
+                                                        >
+                                                            Save
+                                                        </button>
+
+
+                                                        <button
+                                                            onClick={
+                                                                cancelEditing
+                                                            }
+                                                        >
+                                                            Cancel
+                                                        </button>
+
+                                                    </div>
 
                                                 </div>
 
-                                            </div>
+                                            ) : (
 
-                                        </>
+                                                <>
 
-                                    )}
+                                                    <div
+                                                        className="transaction-main"
+                                                    >
 
-                                </div>
+                                                        <strong>
+                                                            {
+                                                                transaction.description
+                                                            }
+                                                        </strong>
 
+
+                                                        <span>
+                                                            {
+                                                                transaction.category
+                                                            }
+
+                                                            {" • "}
+
+                                                            {
+                                                                transaction.date
+                                                            }
+                                                        </span>
+
+
+                                                        <div
+                                                            className={
+                                                                transaction.fraud
+                                                                    ? "fraud-badge fraud-badge-high"
+                                                                    : "fraud-badge fraud-badge-low"
+                                                            }
+                                                        >
+
+                                                            <span className="fraud-badge-icon">
+
+                                                                {
+                                                                    transaction.fraud
+                                                                        ? "⚠️"
+                                                                        : "🟢"
+                                                                }
+
+                                                            </span>
+
+
+                                                            <span>
+
+                                                                {
+                                                                    transaction.fraud
+                                                                        ? "High Fraud Risk"
+                                                                        : "Low Fraud Risk"
+                                                                }
+
+                                                            </span>
+
+
+                                                            <strong>
+
+                                                                {(
+                                                                    (transaction.fraudProbability ?? 0) *
+                                                                    100
+                                                                ).toFixed(1)}
+
+                                                                %
+
+                                                            </strong>
+
+                                                        </div>
+
+                                                    </div>
+
+
+                                                    <div
+                                                        className="transaction-right"
+                                                    >
+
+                                                        <strong>
+
+                                                            {
+                                                                transaction.type ===
+                                                                "INCOME"
+                                                                    ? "+"
+                                                                    : "-"
+                                                            }
+
+                                                            ₹
+
+                                                            {
+                                                                transaction.amount
+                                                            }
+
+                                                        </strong>
+
+
+                                                        <div
+                                                            className="transaction-actions"
+                                                        >
+
+                                                            <button
+                                                                onClick={() =>
+                                                                    startEditing(
+                                                                        transaction
+                                                                    )
+                                                                }
+                                                            >
+                                                                Edit
+                                                            </button>
+
+
+                                                            <button
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        transaction.id!
+                                                                    )
+                                                                }
+                                                            >
+                                                                Delete
+                                                            </button>
+
+                                                        </div>
+
+                                                    </div>
+
+                                                </>
+
+                                            )
+                                        }
+
+                                    </div>
+
+                                )
                             )
-                        )
 
-                    )}
+                        )
+                    }
 
                 </div>
 
@@ -627,5 +776,6 @@ function App() {
         </div>
     );
 }
+
 
 export default App;

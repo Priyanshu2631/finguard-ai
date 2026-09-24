@@ -12,11 +12,15 @@ public class TransactionService {
 
     private final TransactionRepository repository;
 
-    public TransactionService(TransactionRepository repository) {
+    public TransactionService(
+            TransactionRepository repository
+    ) {
         this.repository = repository;
     }
 
-    public Transaction addTransaction(Transaction transaction) {
+    public Transaction addTransaction(
+            Transaction transaction
+    ) {
         return repository.save(transaction);
     }
 
@@ -24,25 +28,78 @@ public class TransactionService {
         return repository.findAll();
     }
 
-    public Optional<Transaction> getTransactionById(Long id) {
+    public Optional<Transaction> getTransactionById(
+            Long id
+    ) {
         return repository.findById(id);
     }
 
-    public Transaction updateTransaction(Long id, Transaction updatedTransaction) {
+    public Transaction updateTransaction(
+            Long id,
+            Transaction updatedTransaction
+    ) {
 
-        Transaction existingTransaction = repository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Transaction not found"));
+        Transaction existingTransaction =
+                repository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Transaction not found"
+                                )
+                        );
 
-        existingTransaction.setDescription(updatedTransaction.getDescription());
-        existingTransaction.setAmount(updatedTransaction.getAmount());
-        existingTransaction.setCategory(updatedTransaction.getCategory());
-        existingTransaction.setType(updatedTransaction.getType());
-        existingTransaction.setDate(updatedTransaction.getDate());
+        existingTransaction.setDescription(
+                updatedTransaction.getDescription()
+        );
 
-        return repository.save(existingTransaction);
+        existingTransaction.setAmount(
+                updatedTransaction.getAmount()
+        );
+
+        existingTransaction.setCategory(
+                updatedTransaction.getCategory()
+        );
+
+        existingTransaction.setType(
+                updatedTransaction.getType()
+        );
+
+        existingTransaction.setDate(
+                updatedTransaction.getDate()
+        );
+
+        return repository.save(
+                existingTransaction
+        );
     }
 
-    public void deleteTransaction(Long id) {
+    public Transaction updateFraudAnalysis(
+            Long id,
+            boolean fraud,
+            double fraudProbability
+    ) {
+
+        Transaction transaction =
+                repository.findById(id)
+                        .orElseThrow(() ->
+                                new RuntimeException(
+                                        "Transaction not found"
+                                )
+                        );
+
+        transaction.setFraud(fraud);
+
+        transaction.setFraudProbability(
+                fraudProbability
+        );
+
+        return repository.save(
+                transaction
+        );
+    }
+
+    public void deleteTransaction(
+            Long id
+    ) {
         repository.deleteById(id);
     }
 }

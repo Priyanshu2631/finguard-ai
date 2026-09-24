@@ -1,0 +1,326 @@
+import json
+import os
+import time
+
+from flask import Flask, request, jsonify
+from google import genai
+
+from predict import predict_fraud
+
+
+app = Flask(__name__)
+
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+if not GEMINI_API_KEY:
+    raise ValueError(
+        "GEMINI_API_KEY environment variable is not set."
+    )
+
+
+client = genai.Client(
+    api_key=GEMINI_API_KEY
+)
+
+GEMINI_MODEL = "gemini-3.6-flash"
+
+
+def generate_gemini_response(prompt):
+    max_attempts = 3
+
+    for attempt in range(max_attempts):
+
+        try:
+
+            response = client.models.generate_content(
+                model=GEMINI_MODEL,
+                contents=prompt
+            )
+
+            return response.text
+
+        except Exception as error:
+
+            error_message = str(error)
+
+            print(
+                f"Gemini attempt "
+                f"{attempt + 1}/{max_attempts} failed:"
+            )
+
+            print(error_message)
+
+            if "503" not in error_message:
+                raise
+
+            if attempt < max_attempts - 1:
+
+                wait_time = 2 ** attempt
+
+                print(
+                    f"Retrying Gemini in "
+                    f"{wait_time} seconds..."
+                )
+
+                time.sleep(wait_time)
+
+            else:
+
+                raise
+
+
+@app.route(
+    "/health",
+    methods=["GET"]
+)
+def health():
+
+    return jsonify({
+        "status": "ML service is running"
+    })
+
+
+@app.route(
+    "/predict",
+    methods=["POST"]
+)
+def predict():
+
+    data = request.json
+
+    required_fields = [
+        "time",
+        "amount",
+        "v1",
+        "v2",
+        "v3",
+        "v4",
+        "v5",
+        "v6",
+        "v7",
+        "v8",
+        "v9",
+        "v10",
+        "v11",
+        "v12",
+        "v13",
+        "v14",
+        "v15",
+        "v16",
+        "v17",
+        "v18",
+        "v19",
+        "v20",
+        "v21",
+        "v22",
+        "v23",
+        "v24",
+        "v25",
+        "v26",
+        "v27",
+        "v28"
+    ]
+
+    missing_fields = [
+        field
+        for field in required_fields
+        if field not in data
+    ]
+
+    if missing_fields:
+
+        return jsonify({
+            "error": "Missing required fields",
+            "missing_fields": missing_fields
+        }), 400
+
+
+    result = predict_fraud(
+        time=data["time"],
+        amount=data["amount"],
+
+        v1=data["v1"],
+        v2=data["v2"],
+        v3=data["v3"],
+        v4=data["v4"],
+        v5=data["v5"],
+        v6=data["v6"],
+        v7=data["v7"],
+        v8=data["v8"],
+        v9=data["v9"],
+        v10=data["v10"],
+
+        v11=data["v11"],
+        v12=data["v12"],
+        v13=data["v13"],
+        v14=data["v14"],
+        v15=data["v15"],
+        v16=data["v16"],
+        v17=data["v17"],
+        v18=data["v18"],
+        v19=data["v19"],
+        v20=data["v20"],
+
+        v21=data["v21"],
+        v22=data["v22"],
+        v23=data["v23"],
+        v24=data["v24"],
+        v25=data["v25"],
+        v26=data["v26"],
+        v27=data["v27"],
+        v28=data["v28"]
+    )
+
+    return jsonify(result)
+
+
+@app.route(
+    "/assistant",
+    methods=["POST"]
+)
+def assistant():
+
+    data = request.json
+
+    question = data.get(
+        "question",
+        ""
+    )
+
+    transactions = data.get(
+        "transactions",
+        []
+    )
+
+    transaction_data = json.dumps(
+        transactions,
+        indent=2
+    )
+
+
+    prompt = f"""
+You are FinGuard AI, a helpful personal
+finance assistant.
+
+Answer the user's financial question
+using the transaction data provided below.
+
+User question:
+{question}
+
+Transaction data:
+{transaction_data}
+
+Instructions:
+- Give a clear and useful answer.
+- Use the transaction data when relevant.
+- Do not invent transaction information.
+- Explain calculations when useful.
+- Keep the response concise but informative.
+- Use simple language.
+- You can use bullet points when appropriate.
+"""
+
+
+    try:
+
+        answer = generate_gemini_response(
+            prompt
+        )
+
+        return jsonify({
+            "answer": answer
+        })
+
+    except Exception as error:
+
+        print(
+            "Gemini Assistant Error:",
+            error
+        )
+
+        return jsonify({
+            "error":
+                "Gemini is temporarily unavailable. Please try again."
+        }), 503
+
+
+@app.route(
+    "/insights",
+    methods=["POST"]
+)
+def insights():
+
+    data = request.json
+
+    transactions = data.get(
+        "transactions",
+        []
+    )
+
+    transaction_data = json.dumps(
+        transactions,
+        indent=2
+    )
+
+
+    prompt = f"""
+You are FinGuard AI, a personal finance
+analysis assistant.
+
+Analyze the user's transaction history
+and provide useful financial insights.
+
+Transaction data:
+{transaction_data}
+
+Look for:
+- Spending patterns
+- Major spending categories
+- Unusual spending
+- Income versus expenses
+- Potential areas where spending could be reduced
+- Positive financial habits
+- Useful observations about the transaction history
+
+Instructions:
+- Base your observations only on the transaction data provided.
+- Do not invent transactions.
+- Do not claim certainty when the data is insufficient.
+- Keep the response concise.
+- Use clear headings and bullet points.
+- Make the insights practical and easy to understand.
+"""
+
+
+    try:
+
+        insights_text = generate_gemini_response(
+            prompt
+        )
+
+        return jsonify({
+            "insights": insights_text
+        })
+
+    except Exception as error:
+
+        print(
+            "Gemini Insights Error:",
+            error
+        )
+
+        return jsonify({
+            "error":
+                "Gemini is temporarily unavailable. Please try again."
+        }), 503
+
+
+if __name__ == "__main__":
+
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
+    )

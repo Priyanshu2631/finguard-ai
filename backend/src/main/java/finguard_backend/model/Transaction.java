@@ -18,15 +18,26 @@ public class Transaction {
     private String type;
     private String date;
 
+    private boolean fraud;
+    private double fraudProbability;
+
     public Transaction() {
     }
 
-    public Transaction(String description, double amount, String category, String type, String date) {
+    public Transaction(
+            String description,
+            double amount,
+            String category,
+            String type,
+            String date
+    ) {
         this.description = description;
         this.amount = amount;
         this.category = category;
         this.type = type;
         this.date = date;
+        this.fraud = false;
+        this.fraudProbability = 0.0;
     }
 
     public Long getId() {
@@ -71,5 +82,23 @@ public class Transaction {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public boolean isFraud() {
+        return fraud;
+    }
+
+    public void setFraud(boolean fraud) {
+        this.fraud = fraud;
+    }
+
+    public double getFraudProbability() {
+        return fraudProbability;
+    }
+
+    public void setFraudProbability(
+            double fraudProbability
+    ) {
+        this.fraudProbability = fraudProbability;
     }
 }
