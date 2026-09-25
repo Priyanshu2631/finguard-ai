@@ -395,13 +395,3 @@ Generative AI
         =
 FinGuard AI
 ```
-
-## 👨‍💻 Author
-
-**Priyanshu Sahoo**
-
-NIT Rourkela — Electronics & Instrumentation Engineering
-
-## 📄 License
-
-This project is intended for educational and portfolio purposes.
