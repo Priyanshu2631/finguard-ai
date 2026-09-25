@@ -182,8 +182,7 @@ function AiAssistant({
                 ...previous,
                 {
                     role: "ai",
-                    content:
-                        result.answer,
+                    content: result.answer,
                 },
             ]);
 
@@ -194,12 +193,16 @@ function AiAssistant({
                 error
             );
 
+            const message =
+                error instanceof Error
+                    ? error.message
+                    : "Unable to connect to FinGuard AI right now.";
+
             setMessages((previous) => [
                 ...previous,
                 {
                     role: "ai",
-                    content:
-                        "I couldn't connect to FinGuard AI right now. Please check that the ML service is running and try again.",
+                    content: message,
                 },
             ]);
 

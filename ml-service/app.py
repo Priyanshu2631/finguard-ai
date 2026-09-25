@@ -3,12 +3,31 @@ import os
 import time
 
 from flask import Flask, request, jsonify
+
 from google import genai
 
 from predict import predict_fraud
 
 
 app = Flask(__name__)
+
+
+@app.after_request
+def add_cors_headers(response):
+
+    response.headers["Access-Control-Allow-Origin"] = (
+        "http://localhost:5173"
+    )
+
+    response.headers["Access-Control-Allow-Headers"] = (
+        "Content-Type"
+    )
+
+    response.headers["Access-Control-Allow-Methods"] = (
+        "GET, POST, OPTIONS"
+    )
+
+    return response
 
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
@@ -26,7 +45,35 @@ client = genai.Client(
 GEMINI_MODEL = "gemini-3.6-flash"
 
 
+def get_error_code(error):
+
+    error_message = str(error)
+
+    if "429" in error_message:
+        return 429
+
+    if "503" in error_message:
+        return 503
+
+    return 500
+
+
+def is_daily_quota_error(error):
+
+    error_message = str(error).lower()
+
+    return (
+        "resource_exhausted" in error_message
+        and (
+            "daily" in error_message
+            or "generaterequestsperday" in error_message
+            or "free_tier_requests" in error_message
+        )
+    )
+
+
 def generate_gemini_response(prompt):
+
     max_attempts = 3
 
     for attempt in range(max_attempts):
@@ -38,11 +85,17 @@ def generate_gemini_response(prompt):
                 contents=prompt
             )
 
+            if not response.text:
+                raise RuntimeError(
+                    "Gemini returned an empty response."
+                )
+
             return response.text
 
         except Exception as error:
 
             error_message = str(error)
+            error_code = get_error_code(error)
 
             print(
                 f"Gemini attempt "
@@ -51,23 +104,105 @@ def generate_gemini_response(prompt):
 
             print(error_message)
 
-            if "503" not in error_message:
-                raise
-
-            if attempt < max_attempts - 1:
-
-                wait_time = 2 ** attempt
+            if (
+                error_code == 429
+                and is_daily_quota_error(error)
+            ):
 
                 print(
-                    f"Retrying Gemini in "
-                    f"{wait_time} seconds..."
+                    "Gemini daily quota exhausted. "
+                    "Skipping retries."
                 )
 
-                time.sleep(wait_time)
+                raise
 
-            else:
+            if error_code == 503:
+
+                if attempt < max_attempts - 1:
+
+                    wait_time = 2 ** attempt
+
+                    print(
+                        f"Retrying Gemini in "
+                        f"{wait_time} seconds..."
+                    )
+
+                    time.sleep(wait_time)
+
+                    continue
 
                 raise
+
+            if error_code == 429:
+
+                if attempt < max_attempts - 1:
+
+                    wait_time = 2 ** attempt
+
+                    print(
+                        f"Gemini rate limit reached. "
+                        f"Retrying in "
+                        f"{wait_time} seconds..."
+                    )
+
+                    time.sleep(wait_time)
+
+                    continue
+
+                raise
+
+            raise
+
+
+def gemini_error_response(
+    error,
+    feature
+):
+
+    error_code = get_error_code(error)
+
+    if (
+        error_code == 429
+        and is_daily_quota_error(error)
+    ):
+
+        message = (
+            "Gemini daily quota has been reached. "
+            "Please try again after the quota resets."
+        )
+
+        status_code = 429
+
+    elif error_code == 503:
+
+        message = (
+            "Gemini is temporarily experiencing "
+            "high demand. Please try again shortly."
+        )
+
+        status_code = 503
+
+    elif error_code == 429:
+
+        message = (
+            "Gemini is temporarily rate limited. "
+            "Please wait a moment and try again."
+        )
+
+        status_code = 429
+
+    else:
+
+        message = (
+            f"Unable to generate {feature} right now."
+        )
+
+        status_code = 500
+
+    return jsonify({
+        "error": message,
+        "feature": feature
+    }), status_code
 
 
 @app.route(
@@ -83,11 +218,23 @@ def health():
 
 @app.route(
     "/predict",
-    methods=["POST"]
+    methods=["POST", "OPTIONS"]
 )
 def predict():
 
+    if request.method == "OPTIONS":
+
+        return jsonify({
+            "status": "CORS preflight successful"
+        })
+
     data = request.json
+
+    if not data:
+
+        return jsonify({
+            "error": "Request body is required."
+        }), 400
 
     required_fields = [
         "time",
@@ -134,7 +281,6 @@ def predict():
             "error": "Missing required fields",
             "missing_fields": missing_fields
         }), 400
-
 
     result = predict_fraud(
         time=data["time"],
@@ -183,21 +329,32 @@ def assistant():
 
     data = request.json
 
+    if not data:
+
+        return jsonify({
+            "error": "Request body is required."
+        }), 400
+
     question = data.get(
         "question",
         ""
-    )
+    ).strip()
 
     transactions = data.get(
         "transactions",
         []
     )
 
+    if not question:
+
+        return jsonify({
+            "error": "Please enter a question."
+        }), 400
+
     transaction_data = json.dumps(
         transactions,
         indent=2
     )
-
 
     prompt = f"""
 You are FinGuard AI, a helpful personal
@@ -222,7 +379,6 @@ Instructions:
 - You can use bullet points when appropriate.
 """
 
-
     try:
 
         answer = generate_gemini_response(
@@ -240,10 +396,10 @@ Instructions:
             error
         )
 
-        return jsonify({
-            "error":
-                "Gemini is temporarily unavailable. Please try again."
-        }), 503
+        return gemini_error_response(
+            error,
+            "AI Assistant response"
+        )
 
 
 @app.route(
@@ -254,6 +410,12 @@ def insights():
 
     data = request.json
 
+    if not data:
+
+        return jsonify({
+            "error": "Request body is required."
+        }), 400
+
     transactions = data.get(
         "transactions",
         []
@@ -263,7 +425,6 @@ def insights():
         transactions,
         indent=2
     )
-
 
     prompt = f"""
 You are FinGuard AI, a personal finance
@@ -293,7 +454,6 @@ Instructions:
 - Make the insights practical and easy to understand.
 """
 
-
     try:
 
         insights_text = generate_gemini_response(
@@ -311,10 +471,10 @@ Instructions:
             error
         )
 
-        return jsonify({
-            "error":
-                "Gemini is temporarily unavailable. Please try again."
-        }), 503
+        return gemini_error_response(
+            error,
+            "financial insights"
+        )
 
 
 if __name__ == "__main__":
