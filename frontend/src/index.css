@@ -998,3 +998,457 @@ button:not(:disabled):hover {
         font-size: 19px;
     }
 }
+
+/* ==================================================
+   FINTECH UI POLISH
+   ================================================== */
+
+.app {
+    background:
+        radial-gradient(
+            circle at 10% 0%,
+            rgba(37, 99, 235, 0.05),
+            transparent 28%
+        ),
+        #f4f6f8;
+}
+
+/* Main application header */
+
+.app > header {
+    position: relative;
+    overflow: hidden;
+    background:
+        linear-gradient(
+            135deg,
+            #0f172a 0%,
+            #172554 55%,
+            #1e3a8a 100%
+        );
+    color: white;
+    padding: 34px max(24px, calc((100% - 1400px) / 2));
+    box-shadow:
+        0 8px 30px rgba(15, 23, 42, 0.16);
+}
+
+.app > header::after {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    right: -90px;
+    top: -150px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.app > header h1 {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 30px;
+    font-weight: 750;
+    letter-spacing: -0.5px;
+}
+
+.app > header p {
+    position: relative;
+    z-index: 1;
+    margin: 6px 0 0;
+    color: #cbd5e1;
+    font-size: 14px;
+}
+
+/* Top financial summary */
+
+.summary {
+    width: min(1400px, calc(100% - 40px));
+    margin: 26px auto 22px;
+    display: grid;
+    grid-template-columns:
+        repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+
+.summary .card {
+    position: relative;
+    overflow: hidden;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 21px 22px;
+    box-shadow:
+        0 5px 20px rgba(15, 23, 42, 0.055);
+    transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.summary .card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 10px 28px rgba(15, 23, 42, 0.09);
+}
+
+.summary .card::after {
+    content: "";
+    position: absolute;
+    width: 70px;
+    height: 70px;
+    right: -24px;
+    bottom: -24px;
+    border-radius: 50%;
+    background: rgba(37, 99, 235, 0.05);
+}
+
+.summary .card h3 {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.summary .card p {
+    position: relative;
+    z-index: 1;
+    margin: 8px 0 0;
+    color: #0f172a;
+    font-size: 25px;
+    font-weight: 750;
+    letter-spacing: -0.3px;
+}
+
+/* Summary colors */
+
+.summary .card:nth-child(1) p {
+    color: #15803d;
+}
+
+.summary .card:nth-child(2) p {
+    color: #dc2626;
+}
+
+.summary .card:nth-child(3) p {
+    color: #2563eb;
+}
+
+/* Main content */
+
+.content {
+    width: min(1400px, calc(100% - 40px));
+    margin: 0 auto;
+    padding-bottom: 50px;
+}
+
+.transactions {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow:
+        0 5px 20px rgba(15, 23, 42, 0.05);
+}
+
+.transaction-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 15px;
+    margin: 22px 0 15px;
+}
+
+.transaction-heading h2 {
+    margin: 0;
+    color: #111827;
+    font-size: 20px;
+}
+
+.transaction-heading span {
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Transaction rows */
+
+.transaction {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 17px 4px;
+    border-bottom: 1px solid #eef2f7;
+    transition:
+        background 0.15s ease,
+        padding 0.15s ease;
+}
+
+.transaction:last-child {
+    border-bottom: none;
+}
+
+.transaction:hover {
+    background: #fafbfc;
+}
+
+.transaction-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.transaction-main > strong {
+    display: block;
+    margin-bottom: 4px;
+    color: #111827;
+    font-size: 15px;
+}
+
+.transaction-main > span {
+    display: block;
+    color: #64748b;
+    font-size: 12px;
+}
+
+.transaction-right {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    flex-shrink: 0;
+}
+
+.transaction-right > strong {
+    min-width: 105px;
+    text-align: right;
+    color: #111827;
+    font-size: 15px;
+}
+
+.transaction-right > strong:first-letter {
+    font-weight: 700;
+}
+
+.transaction-actions {
+    display: flex;
+    gap: 7px;
+}
+
+.transaction-actions button {
+    padding: 7px 11px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.transaction-actions button:first-child {
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.transaction-actions button:last-child {
+    background: #fef2f2;
+    color: #dc2626;
+}
+
+/* Fraud badge consistency */
+
+.fraud-badge {
+    width: fit-content;
+    margin-top: 8px;
+}
+
+.fraud-badge-low {
+    background: #dcfce7;
+    color: #15803d;
+}
+
+.fraud-badge-high {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+/* Empty state */
+
+.empty-message {
+    margin: 0;
+    padding: 45px 20px;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+}
+
+/* Edit form */
+
+.edit-form {
+    width: 100%;
+    display: grid;
+    grid-template-columns:
+        2fr 1fr 1fr 1fr 1fr auto;
+    gap: 9px;
+    align-items: center;
+}
+
+.edit-form input,
+.edit-form select {
+    width: 100%;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 7px;
+    background: white;
+    color: #111827;
+}
+
+.edit-form input:focus,
+.edit-form select:focus {
+    border-color: #2563eb;
+    box-shadow:
+        0 0 0 3px rgba(37, 99, 235, 0.08);
+}
+
+.edit-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.edit-buttons button:first-child {
+    background: #2563eb;
+    color: white;
+}
+
+.edit-buttons button:last-child {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* Improve all major sections */
+
+.analytics-dashboard,
+.fraud-analytics,
+.ai-financial-insights,
+.fraud-detection-lab {
+    margin-bottom: 24px;
+}
+
+/* Card hover */
+
+.analytics-card,
+.fraud-analytics-card,
+.ai-snapshot-card {
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        border-color 0.18s ease;
+}
+
+.analytics-card:hover,
+.fraud-analytics-card:hover,
+.ai-snapshot-card:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 24px rgba(15, 23, 42, 0.07);
+    border-color: #dbe3ee;
+}
+
+/* Better section spacing */
+
+.fraud-lab,
+.ai-assistant,
+.analytics-dashboard,
+.fraud-analytics {
+    position: relative;
+}
+
+/* Mobile */
+
+@media (max-width: 900px) {
+
+    .summary {
+        grid-template-columns: 1fr;
+    }
+
+    .transaction {
+        align-items: flex-start;
+    }
+
+    .transaction-right {
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 9px;
+    }
+
+    .edit-form {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .edit-buttons {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 600px) {
+
+    .app > header {
+        padding: 25px 18px;
+    }
+
+    .app > header h1 {
+        font-size: 25px;
+    }
+
+    .summary,
+    .content {
+        width: calc(100% - 24px);
+    }
+
+    .summary {
+        margin-top: 16px;
+    }
+
+    .summary .card {
+        padding: 17px;
+    }
+
+    .summary .card p {
+        font-size: 22px;
+    }
+
+    .transactions {
+        padding: 16px;
+        border-radius: 12px;
+    }
+
+    .transaction {
+        flex-direction: column;
+        padding: 15px 2px;
+    }
+
+    .transaction-right {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .transaction-right > strong {
+        min-width: auto;
+        text-align: left;
+    }
+
+    .transaction-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .edit-form {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-buttons {
+        grid-column: auto;
+    }
+}

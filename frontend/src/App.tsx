@@ -25,6 +25,15 @@ import type {
 import "./App.css";
 
 
+const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("en-IN", {
+        style: "currency",
+        currency: "INR",
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+    }).format(amount);
+
+
 function App() {
 
     const [transactions, setTransactions] =
@@ -348,8 +357,7 @@ function App() {
                     </h3>
 
                     <p>
-                        ₹
-                        {totalIncome.toFixed(2)}
+                        {formatCurrency(totalIncome)}
                     </p>
 
                 </div>
@@ -362,8 +370,7 @@ function App() {
                     </h3>
 
                     <p>
-                        ₹
-                        {totalExpense.toFixed(2)}
+                        {formatCurrency(totalExpense)}
                     </p>
 
                 </div>
@@ -376,8 +383,7 @@ function App() {
                     </h3>
 
                     <p>
-                        ₹
-                        {balance.toFixed(2)}
+                        {formatCurrency(balance)}
                     </p>
 
                 </div>
@@ -718,10 +724,10 @@ function App() {
                                                                     : "-"
                                                             }
 
-                                                            ₹
-
                                                             {
-                                                                transaction.amount
+                                                                formatCurrency(
+                                                                    transaction.amount
+                                                                )
                                                             }
 
                                                         </strong>
